@@ -1,0 +1,104 @@
+# Veri Seti Kalite Analizi Konfigürasyonu
+analysis:
+  # Sınıf başına minimum örnek sayısı
+  min_samples_per_class: 50
+  
+  # Genel kalite eşik değeri
+  quality_threshold: 0.7
+  
+  # Minimum görüntü boyutu (pixel)
+  min_image_size: 224
+  
+  # Maximum görüntü boyutu (pixel) 
+  max_image_size: 4096
+  
+  # Class imbalance maksimum oranı
+  max_class_imbalance: 0.8
+  
+  # Annotation kalitesi için minimum IoU
+  min_annotation_iou: 0.5
+  
+  # Bulanıklık tespiti için eşik değeri
+  blur_threshold: 100.0
+  
+  # Minimum parlaklık değeri
+  min_brightness: 30
+  
+  # Maximum parlaklık değeri
+  max_brightness: 225
+
+visualization:
+  # Grafik boyutu [genişlik, yükseklik]
+  figure_size: [12, 8]
+  
+  # Renk paleti
+  color_palette: "viridis"
+  
+  # Grafikleri kaydet
+  save_plots: true
+  
+  # Çıktı formatı
+  output_format: "png"
+  
+  # DPI ayarı
+  dpi: 300
+  
+  # Font boyutu
+  font_size: 12
+
+reporting:
+  # Rapor formatı (pdf, html)
+  format: "html"
+  
+  # Rapor başlığı
+  title: "Görüntü Veri Seti Kalite Analizi Raporu"
+  
+  # Yazar bilgisi
+  author: "Veri Analiz Sistemi"
+  
+  # Logo dosyası (opsiyonel)
+  logo_path: null
+  
+  # Çıktı dizini
+  output_dir: "data/output"
+
+dataset:
+  # Desteklenen görüntü formatları
+  supported_image_formats: ['.jpg', '.jpeg', '.png', '.bmp', '.tiff']
+  
+  # Desteklenen annotation formatları
+  supported_annotation_formats: ['yolo', 'coco', 'pascal_voc', 'labelme']
+  
+  # Varsayılan annotation formatı  
+  default_annotation_format: 'yolo'
+  
+  # Eğitim/test ayrımı oranları
+  train_split: 0.8
+  val_split: 0.1
+  test_split: 0.1
+
+quality_scoring:
+  # Kalite skoru ağırlıkları (toplam 1.0 olmalı)
+  weights:
+    image_quality: 0.3
+    annotation_quality: 0.3
+    class_balance: 0.2
+    dataset_size: 0.1
+    diversity: 0.1
+  
+  # Skor aralıkları
+  score_ranges:
+    excellent: [90, 100]
+    good: [75, 89]
+    fair: [60, 74]
+    poor: [0, 59]
+
+logging:
+  # Log seviyesi
+  level: "INFO"
+  
+  # Log dosyası
+  file: "logs/analysis.log"
+  
+  # Log formatı
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

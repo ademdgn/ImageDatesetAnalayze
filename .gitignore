@@ -1,0 +1,466 @@
+# Enhanced Dataset Quality Analysis System
+# .gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# PyCharm
+.idea/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# System files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+*.lnk
+
+# Linux
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.log
+*.bak
+*.backup
+*.orig
+
+# Output directories
+data/output/
+data/processed/
+reports/
+results/
+exports/
+
+# Test output
+test_output/
+test_reports/
+integration_test/
+
+# Logs
+logs/
+*.log
+log_*
+
+# Cache directories
+.cache/
+cache/
+__cache__/
+
+# Model files (usually large)
+*.pkl
+*.pickle
+*.joblib
+*.h5
+*.hdf5
+*.pb
+*.onnx
+*.pt
+*.pth
+*.model
+models/
+checkpoints/
+weights/
+
+# Dataset files (usually large)
+datasets/
+data/input/*/
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Image files (except samples)
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.bmp
+*.tiff
+*.tif
+*.svg
+*.webp
+# Except small example images
+!examples/*.jpg
+!examples/*.png
+!samples/*.jpg
+!samples/*.png
+!docs/images/*.png
+!docs/images/*.jpg
+
+# Video files
+*.mp4
+*.avi
+*.mkv
+*.mov
+*.wmv
+*.flv
+
+# Audio files
+*.mp3
+*.wav
+*.flac
+
+# Archives
+*.zip
+*.tar
+*.gz
+*.bz2
+*.xz
+
+# Configuration files with sensitive data
+config/production.yaml
+config/secrets.yaml
+.secrets
+secrets.json
+
+# API keys and credentials
+.env.local
+.env.production
+api_keys.txt
+credentials.json
+token.txt
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+
+# Generated documentation
+docs/_build/
+docs/site/
+
+# Profiling data
+*.prof
+profiling_results/
+
+# Benchmark results
+benchmark_results/
+performance_reports/
+
+# Large data files
+*.npy
+*.npz
+*.mat
+*.hdf
+*.parquet
+
+# Compiled extensions
+*.so
+*.dylib
+*.dll
+
+# Package files
+*.rpm
+*.deb
+*.dmg
+
+# Generated files
+generated/
+auto_generated/
+
+# Temporary analysis files
+temp_analysis/
+scratch/
+tmp/
+
+# Development and debugging
+debug/
+debug_output/
+dev_test/
+playground/
+
+# IDE specific files
+*.swp
+*.swo
+.idea/
+.vscode/
+*.sublime-*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Backup files
+*.bak
+*.backup
+*.orig
+*.save
+
+# Temporary editor files
+*~
+#*#
+.#*
+
+# Pipeline cache
+pipeline_cache/
+.pipeline/
+
+# Analysis cache
+analysis_cache/
+.analysis_cache/
+
+# Quality assessment cache
+quality_cache/
+.quality_cache/
+
+# Enhanced analyzer specific
+data/output/*
+!data/output/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+enhanced_reports/
+comparison_reports/
+executive_summaries/
+
+# Test datasets (keep structure, ignore data)
+data/input/*/
+!data/input/sample/
+!data/input/example/
+
+# Log files
+logs/*.log
+!logs/.gitkeep
+enhanced_analysis.log
+quality_assessment.log
+pipeline.log
+
+# Configuration overrides
+config/local.yaml
+config/development.yaml
+config/user_*.yaml
+
+# Performance profiling
+profile_output/
+*.prof
+*.profile
+
+# Memory dumps
+*.dump
+core.*
+
+# Coverage reports
+htmlcov/
+.coverage*
+coverage.xml
+*.cover
+
+# Documentation builds
+docs/_build/
+docs/build/
+
+# Virtual environments
+venv*/
+ENV*/
+.env*/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# PyCharm
+.idea/
+*.iml
+
+# Spyder
+.spyderproject
+.spyproject
+
+# Rope
+.ropeproject/
+
+# Pylint
+pylint-report.txt
+
+# MyPy
+.mypy_cache/
+
+# pytest
+.pytest_cache/
+
+# Hypothesis
+.hypothesis/
+
+# pipenv
+Pipfile.lock
+
+# Poetry
+poetry.lock
+
+# Large binary files
+*.bin
+*.exe
+*.msi
+
+# Compressed files
+*.zip
+*.rar
+*.7z
+*.tar*
+*.gz
+*.bz2
+*.xz
+
+# Keep important directories structure
+!data/
+!data/input/
+!data/output/
+!logs/
+!config/
+!src/
+!tests/
+
+# Keep example files
+!examples/
+!samples/
+!docs/
+
+# Version control
+.git/
+.gitattributes
+
+# Package managers
+node_modules/
+yarn.lock
+package-lock.json
+
+# End of .gitignore

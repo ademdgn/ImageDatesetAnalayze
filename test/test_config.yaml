@@ -1,0 +1,59 @@
+# Test Configuration
+# Bu dosya test yapılandırması için kullanılır
+
+test_config:
+  # Genel test ayarları
+  verbose: false
+  timeout: 300  # 5 dakika
+  temp_dir_cleanup: true
+  
+  # Annotation analyzer test ayarları
+  annotation_analyzer:
+    sample_dataset_size: 10
+    edge_case_tests: true
+    performance_tests: true
+    real_dataset_tests: true
+    
+    # Test dataset ayarları
+    test_dataset:
+      yolo_files: 10
+      coco_files: 2
+      pascal_voc_files: 2
+      edge_case_files: 5
+      
+    # Performance test ayarları
+    performance:
+      max_parse_time_ms: 100
+      max_analysis_time_ms: 500
+      min_files_for_performance: 20
+      
+  # Image analyzer test ayarları (gelecek için)
+  image_analyzer:
+    enabled: false
+    sample_images: 10
+    
+  # Data loader test ayarları (gelecek için)  
+  data_loader:
+    enabled: false
+    sample_files: 5
+
+# Test data paths
+test_paths:
+  real_dataset: "data/input/yolov11_dataset_vol1"
+  temp_base: "/tmp/test_datasets"
+  output_dir: "test/output"
+
+# Expected test results
+expected_results:
+  annotation_analyzer:
+    min_success_rate: 90
+    required_imports: 
+      - "AnnotationAnalyzer"
+      - "FormatParserFactory"
+      - "ClassDistributionAnalyzer"
+      - "BoundingBoxAnalyzer"
+      - "AnnotationQualityChecker"
+    supported_formats:
+      - "yolo"
+      - "coco"
+      - "pascal_voc"
