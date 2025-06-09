@@ -7,9 +7,10 @@ import sys
 import os
 from pathlib import Path
 
-# Ana dizini path'e ekle
+# Proje kök dizinini path'e ekle
 current_dir = Path(__file__).parent
-sys.path.insert(0, str(current_dir))
+project_root = current_dir.parent  # ImageDatesetAnalayze klasörü
+sys.path.insert(0, str(project_root))
 
 # Test fonksiyonları
 def test_import_modules():
@@ -56,7 +57,7 @@ def test_config_manager():
         # Config değerlerini test et
         assert 'logging' in config
         assert 'analysis' in config
-        assert 'output' in config
+        assert 'reporting' in config  # 'output' yerine 'reporting'
         print("✅ Config yapısı doğru")
         
         return True
@@ -70,7 +71,7 @@ def test_enhanced_analyzer():
     print("\n🧪 Enhanced Analyzer testi...")
     
     # Veri seti yolu
-    dataset_path = current_dir / 'data' / 'input' / 'yolov11_dataset_vol1'
+    dataset_path = project_root / 'data' / 'input' / 'yolov11_dataset_vol1'
     
     if not dataset_path.exists():
         print(f"⚠️  Test veri seti bulunamadı: {dataset_path}")
@@ -161,7 +162,7 @@ def run_integration_test():
     """Entegrasyon testi"""
     print("\n🔗 ENTEGRASYON TESTİ...")
     
-    dataset_path = current_dir / 'data' / 'input' / 'yolov11_dataset_vol1'
+    dataset_path = project_root / 'data' / 'input' / 'yolov11_dataset_vol1'
     
     if not dataset_path.exists():
         print(f"⚠️  Test veri seti bulunamadı: {dataset_path}")

@@ -9,7 +9,7 @@ from pathlib import Path
 
 # Src klasörünü path'e ekle
 current_dir = Path(__file__).parent
-src_dir = current_dir.parent / 'src'
+src_dir = current_dir.parent 
 sys.path.insert(0, str(src_dir))
 
 # Gerekli importlar

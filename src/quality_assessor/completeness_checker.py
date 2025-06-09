@@ -34,6 +34,58 @@ class CompletenessChecker:
             'check_directory_structure': True
         }
     
+    def check_completeness(self, dataset_path: Path) -> Dict[str, any]:
+        """Ana eksiksizlik kontrolü fonksiyonu"""
+        try:
+            # Veri seti yolunu string'e çevir
+            dataset_path_str = str(dataset_path)
+            
+            # Veri seti bilgilerini topla
+            dataset_info = {
+                'dataset_path': dataset_path_str,
+                'image_files': self._find_image_files(dataset_path),
+                'annotation_files': self._find_annotation_files(dataset_path)
+            }
+            
+            # Eksiksizlik analizi yap
+            return self.check_dataset_completeness(dataset_info)
+            
+        except Exception as e:
+            logger.error(f"Eksiksizlik kontrolü hatasi: {str(e)}")
+            return {
+                'completeness_score': 0.0,
+                'total_images': 0,
+                'total_annotations': 0,
+                'missing_images': [],
+                'missing_annotations': [],
+                'corrupted_images': [],
+                'corrupted_annotations': [],
+                'issues': [f'Kontrol hatasi: {str(e)}'],
+                'warnings': []
+            }
+    
+    def _find_image_files(self, dataset_path: Path) -> List[str]:
+        """Görüntü dosyalarını bul"""
+        image_files = []
+        try:
+            for ext in self.config['image_extensions']:
+                image_files.extend([str(f) for f in dataset_path.rglob(f'*{ext}')])
+                image_files.extend([str(f) for f in dataset_path.rglob(f'*{ext.upper()}')])
+        except Exception as e:
+            logger.error(f"Görüntü dosyaları arama hatasi: {str(e)}")
+        return image_files
+    
+    def _find_annotation_files(self, dataset_path: Path) -> List[str]:
+        """Annotation dosyalarını bul"""
+        annotation_files = []
+        try:
+            for ext in self.config['annotation_extensions']:
+                annotation_files.extend([str(f) for f in dataset_path.rglob(f'*{ext}')])
+                annotation_files.extend([str(f) for f in dataset_path.rglob(f'*{ext.upper()}')])
+        except Exception as e:
+            logger.error(f"Annotation dosyaları arama hatasi: {str(e)}")
+        return annotation_files
+
     def check_dataset_completeness(self, dataset_info: Dict) -> Dict[str, any]:
         """
         Veri seti eksiksizliğini kapsamlı kontrol et

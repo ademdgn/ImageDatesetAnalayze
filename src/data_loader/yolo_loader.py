@@ -69,7 +69,29 @@ class YOLODatasetLoader(BaseDatasetLoader):
         possible_image_dirs = ['images', 'imgs', 'data', 'img']
         possible_label_dirs = ['labels', 'annotations', 'ann', 'txt']
         
-        # Ana dizinde görüntü dizinlerini ara
+        # ÖNCE: Train/val/test split'lerini kontrol et (en yaygın yapı)
+        split_names = ['train', 'val', 'test', 'valid']
+        found_splits = []
+        
+        for split_name in split_names:
+            split_dir = self.dataset_path / split_name
+            if split_dir.exists():
+                # Bu split içinde images klasörü var mı?
+                for img_dir_name in possible_image_dirs:
+                    split_img_dir = split_dir / img_dir_name
+                    if split_img_dir.exists():
+                        found_splits.append(split_name)
+                        if not structure['image_dirs']:  # İlk bulduğumuzu referans olarak al
+                            structure['image_dirs'].append(self.dataset_path)  # Ana dizin
+                        break
+        
+        if found_splits:
+            structure['has_splits'] = True
+            structure['splits'] = found_splits
+            self.logger.info(f"Split yapısı tespit edildi: {found_splits}")
+            return structure
+        
+        # SONRA: Ana dizinde görüntü dizinlerini ara
         for dir_name in possible_image_dirs:
             potential_dir = self.dataset_path / dir_name
             if potential_dir.exists():
@@ -98,18 +120,6 @@ class YOLODatasetLoader(BaseDatasetLoader):
                         if f.name not in ['classes.txt', 'names.txt', 'class_names.txt']]
             if txt_files:
                 structure['label_dirs'].append(self.dataset_path)
-        
-        # Train/val/test split'lerini kontrol et
-        if structure['image_dirs']:
-            main_image_dir = structure['image_dirs'][0]
-            
-            # Split dizinlerini kontrol et
-            split_names = ['train', 'val', 'test', 'valid']
-            for split_name in split_names:
-                split_dir = main_image_dir / split_name
-                if split_dir.exists():
-                    structure['has_splits'] = True
-                    structure['splits'].append(split_name)
         
         return structure
     
@@ -184,22 +194,38 @@ class YOLODatasetLoader(BaseDatasetLoader):
         annotations_info = []
         
         # Görüntü dizinini belirle
-        main_image_dir = structure['image_dirs'][0]
-        if split_name == 'all':
-            image_dir = main_image_dir
+        if structure['has_splits'] and split_name != 'all':
+            # Split yapısı: dataset/train/images/, dataset/train/labels/
+            image_dir = self.dataset_path / split_name / 'images'
+            label_dir = self.dataset_path / split_name / 'labels'
+            
+            # Eğer images yoksa diğer isimleri dene
+            if not image_dir.exists():
+                for img_dir_name in ['imgs', 'data', 'img']:
+                    alt_img_dir = self.dataset_path / split_name / img_dir_name
+                    if alt_img_dir.exists():
+                        image_dir = alt_img_dir
+                        break
+            
+            # Eğer labels yoksa diğer isimleri dene  
+            if not label_dir.exists():
+                for label_dir_name in ['annotations', 'ann', 'txt']:
+                    alt_label_dir = self.dataset_path / split_name / label_dir_name
+                    if alt_label_dir.exists():
+                        label_dir = alt_label_dir
+                        break
         else:
-            image_dir = main_image_dir / split_name
-        
-        # Label dizinini belirle
-        label_dir = None
-        if structure['label_dirs']:
-            main_label_dir = structure['label_dirs'][0]
-            if split_name == 'all':
-                label_dir = main_label_dir
+            # Tek dizin yapısı: dataset/images/, dataset/labels/
+            main_image_dir = structure['image_dirs'][0] if structure['image_dirs'] else self.dataset_path
+            image_dir = main_image_dir
+            
+            label_dir = None
+            if structure['label_dirs']:
+                label_dir = structure['label_dirs'][0]
             else:
-                potential_label_dir = main_label_dir / split_name
-                if potential_label_dir.exists():
-                    label_dir = potential_label_dir
+                label_dir = self.dataset_path
+        
+        self.logger.debug(f"Split '{split_name}' için dizinler - Images: {image_dir}, Labels: {label_dir}")
         
         # Görüntü dosyalarını bul
         image_files = []
@@ -207,6 +233,10 @@ class YOLODatasetLoader(BaseDatasetLoader):
             for ext in FileUtils.SUPPORTED_IMAGE_EXTENSIONS:
                 image_files.extend(image_dir.glob(f'*{ext}'))
                 image_files.extend(image_dir.glob(f'*{ext.upper()}'))
+            
+            self.logger.info(f"Split '{split_name}': {len(image_files)} görüntü bulundu")
+        else:
+            self.logger.warning(f"Görüntü dizini bulunamadı: {image_dir}")
         
         # Her görüntü için işlem yap
         for img_path in image_files:
@@ -215,12 +245,15 @@ class YOLODatasetLoader(BaseDatasetLoader):
             images_info.append(img_info)
             
             # Karşılık gelen annotation dosyasını bul
-            if label_dir:
+            if label_dir and label_dir.exists():
                 label_path = label_dir / f"{img_path.stem}.txt"
                 if label_path.exists():
                     annotations = self._parse_yolo_annotation_file(label_path, img_info)
                     annotations_info.extend(annotations)
+                else:
+                    self.logger.debug(f"Annotation bulunamadı: {label_path}")
         
+        self.logger.info(f"Split '{split_name}': {len(annotations_info)} annotation yüklendi")
         return images_info, annotations_info
     
     def _parse_yolo_annotation_file(self, label_path: Path, img_info: Dict) -> List[Dict]:
@@ -305,3 +338,28 @@ class YOLODatasetLoader(BaseDatasetLoader):
             
         except ValueError:
             return None
+    
+    def extract_classes_from_annotations(self) -> Dict[int, str]:
+        """Annotation'lardan sınıf bilgilerini çıkar"""
+        class_ids = set()
+        
+        for annotation in self.annotations_info:
+            if 'class_id' in annotation:
+                class_ids.add(annotation['class_id'])
+        
+        # Sınıf ID'lerini sırala ve varsayılan isimler ver
+        sorted_class_ids = sorted(class_ids)
+        classes = {class_id: f'class_{class_id}' for class_id in sorted_class_ids}
+        
+        self.logger.info(f"Annotation'lardan {len(classes)} sınıf çıkarıldı: {list(classes.keys())}")
+        return classes
+    
+    def update_annotation_class_ids(self):
+        """Annotation'lardaki sınıf adlarını güncelle"""
+        for annotation in self.annotations_info:
+            if 'class_id' in annotation:
+                class_id = annotation['class_id']
+                if class_id in self.classes_info:
+                    annotation['class_name'] = self.classes_info[class_id]
+        
+        self.logger.info(f"Annotation sınıf adları güncellendi")

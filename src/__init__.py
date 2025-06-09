@@ -15,7 +15,7 @@ from .data_loader import DatasetLoader, load_dataset, quick_validate
 
 from .image_analyzer import ImageAnalyzer
 from .annotation_analyzer import AnnotationAnalyzer
-# from .quality_assessor import QualityAssessor
+from .quality_assessor import DatasetQualityAssessor
 # from .visualizer import Visualizer
 # from .report_generator import ReportGenerator
 
@@ -25,7 +25,7 @@ __all__ = [
     'quick_validate',
     'ImageAnalyzer',
     'AnnotationAnalyzer',
-    # 'QualityAssessor',
+    'DatasetQualityAssessor',
     # 'Visualizer',
     # 'ReportGenerator'
 ]
