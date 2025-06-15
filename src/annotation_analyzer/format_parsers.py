@@ -25,7 +25,7 @@ class YOLOParser:
     
     def parse_annotation_file(self, annotation_path: str) -> Dict[str, Any]:
         """
-        YOLO annotation dosyasını parse et
+        YOLO annotation dosyasını parse et - Güvenli versiyon
         
         Args:
             annotation_path: Annotation dosyası yolu
@@ -33,11 +33,40 @@ class YOLOParser:
         Returns:
             Parse edilmiş annotation verisi
         """
+        # Path type check - kritik hata düzeltmesi
+        if isinstance(annotation_path, (list, tuple)):
+            return {
+                'file_path': str(annotation_path),
+                'format': 'yolo',
+                'error': 'Invalid path type - expected string',
+                'parsing_failed': True
+            }
+        
         try:
+            annotation_path = Path(annotation_path)
+            
+            # Dosya varlık kontrolü
+            if not annotation_path.exists():
+                return {
+                    'file_path': str(annotation_path),
+                    'format': 'yolo',
+                    'error': 'File not found',
+                    'parsing_failed': True
+                }
+            
             annotations = []
             
-            with open(annotation_path, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
+            # Güvenli dosya okuma
+            try:
+                with open(annotation_path, 'r', encoding='utf-8') as f:
+                    lines = f.readlines()
+            except Exception as read_error:
+                return {
+                    'file_path': str(annotation_path),
+                    'format': 'yolo',
+                    'error': f'File read error: {read_error}',
+                    'parsing_failed': True
+                }
             
             for line_num, line in enumerate(lines):
                 line = line.strip()
@@ -78,7 +107,7 @@ class YOLOParser:
                     continue
             
             return {
-                'file_path': annotation_path,
+                'file_path': str(annotation_path),
                 'format': 'yolo',
                 'annotations': annotations,
                 'total_objects': len(annotations),
@@ -88,7 +117,7 @@ class YOLOParser:
             
         except Exception as e:
             return {
-                'file_path': annotation_path,
+                'file_path': str(annotation_path),
                 'format': 'yolo',
                 'error': str(e),
                 'parsing_failed': True

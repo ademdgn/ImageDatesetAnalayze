@@ -26,12 +26,100 @@ class DatasetQualityAssessor(BaseQualityAssessor):
     """
     
     def __init__(self, dataset_path: str, config: Optional[Dict] = None):
-        super().__init__(config)
+        # Varsayılan config değerlerini ayarla - TÜM MODÜLLERLE UYUMLU
+        self.default_config = {
+            'analysis': {
+                'image_extensions': ['.jpg', '.jpeg', '.png', '.bmp', '.tiff'],
+                'annotation_extensions': ['.txt', '.json', '.xml'],
+                'minimum_requirements': {
+                    'min_total_images': 100,
+                    'min_total_annotations': 100,
+                    'min_classes': 2,
+                    'min_samples_per_class': 10
+                },
+                'thresholds': {
+                    'excellent_threshold': 90,
+                    'good_threshold': 75,
+                    'fair_threshold': 60,
+                    'poor_threshold': 40,
+                    'image_quality': {'excellent': 0.9, 'good': 0.75, 'fair': 0.6, 'poor': 0.0},
+                    'annotation_quality': {'excellent': 0.9, 'good': 0.75, 'fair': 0.6, 'poor': 0.0},
+                    'class_balance': {'excellent': 0.9, 'good': 0.75, 'fair': 0.6, 'poor': 0.0}
+                },
+                'penalties': {
+                    'missing_files': 30,
+                    'corrupted_files': 20,
+                    'low_resolution': 15,
+                    'class_imbalance': 25,
+                    'inconsistent_annotations': 20,
+                    'missing_images': 0.1,
+                    'missing_annotations': 0.1,
+                    'corrupt_files': 0.05,
+                    'low_quality_images': 0.05
+                },
+                'bonuses': {
+                    'high_diversity': 10,
+                    'consistent_quality': 5,
+                    'rich_annotations': 8
+                },
+                'priority_thresholds': {
+                    'high_priority': 50,
+                    'medium_priority': 70,
+                    'low_priority': 85,
+                    'critical': 0.3,
+                    'high': 0.6,
+                    'medium': 0.8,
+                    'low': 1.0
+                },
+                'category_weights': {
+                    'completeness': 1.2,
+                    'image_quality': 1.1,
+                    'annotation_quality': 1.1,
+                    'diversity': 1.0,
+                    'consistency': 0.9
+                }
+            },
+            'weights': {
+                'image_quality': 0.25,
+                'annotation_quality': 0.25,
+                'completeness': 0.20,
+                'diversity': 0.15,
+                'consistency': 0.15
+            }
+        }
+        
+        # Config'i merge et ve tüm modüllere uygun hale getir
+        if config:
+            merged_config = self.default_config.copy()
+            if 'analysis' in config:
+                merged_config['analysis'].update(config['analysis'])
+            self.unified_config = merged_config
+            super().__init__(merged_config)
+        else:
+            self.unified_config = self.default_config
+            super().__init__(self.default_config)
         
         self.dataset_path = Path(dataset_path)
-        self.completeness_checker = CompletenessChecker(config)
-        self.quality_scorer = QualityScorer(config)
-        self.recommendation_engine = RecommendationEngine(config)
+        
+        # Alt modüllere uygun config'ler hazırla
+        completeness_config = self.unified_config.copy()
+        
+        scorer_config = self.unified_config.copy()
+        scorer_config.update({
+            'thresholds': self.unified_config['analysis']['thresholds'],
+            'penalties': self.unified_config['analysis']['penalties'],
+            'bonuses': self.unified_config['analysis']['bonuses']
+        })
+        
+        recommendation_config = self.unified_config.copy() 
+        recommendation_config.update({
+            'priority_thresholds': self.unified_config['analysis']['priority_thresholds'],
+            'category_weights': self.unified_config['analysis']['category_weights']
+        })
+        
+        self.completeness_checker = CompletenessChecker(completeness_config)
+        self.quality_scorer = QualityScorer(scorer_config)
+        self.recommendation_engine = RecommendationEngine(recommendation_config)
         
         # Analiz sonuçlarını saklamak için
         self.analysis_results = {}
@@ -197,15 +285,18 @@ class DatasetQualityAssessor(BaseQualityAssessor):
                 issues.append(f"Geçersiz bounding box oranı: %{invalid_bbox_ratio*100:.1f}")
             
             # Minimum gereksinimler kontrolü
-            requirements_met, requirement_issues = self.validate_minimum_requirements({
-                'total_images': completeness_analysis.get('total_images', 0),
-                'class_counts': annotation_analysis.get('class_counts', {}),
-                'average_resolution': image_analysis.get('average_resolution', 0),
-                'class_imbalance_ratio': class_imbalance_ratio
-            })
-            
-            if not requirements_met:
-                issues.extend(requirement_issues)
+            try:
+                requirements_met, requirement_issues = self.validate_minimum_requirements({
+                    'total_images': completeness_analysis.get('total_images', 0),
+                    'class_counts': annotation_analysis.get('class_counts', {}),
+                    'average_resolution': image_analysis.get('average_resolution', 0),
+                    'class_imbalance_ratio': class_imbalance_ratio
+                })
+                
+                if not requirements_met:
+                    issues.extend(requirement_issues)
+            except Exception as req_error:
+                logger.warning(f"Minimum gereksinimler kontrolü atlandı: {str(req_error)}")
             
         except Exception as e:
             logger.error(f"Sorun tespiti hatası: {str(e)}")

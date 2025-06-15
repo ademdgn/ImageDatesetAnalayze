@@ -98,22 +98,21 @@ class AnalysisPipeline:
             # Pipeline sonuçlarını özetle
             completed_steps = [s['name'] for s in self.pipeline_steps if s['status'] == 'completed']
             
-            pipeline_result = {
-                'success': len(failed_steps) == 0,
-                'total_duration': total_duration,
-                'completed_steps': completed_steps,
-                'failed_steps': failed_steps,
-                'step_results': self.step_results,
-                'step_timings': self.step_timings,
-                'pipeline_summary': self._generate_pipeline_summary()
-            }
-            
             if failed_steps:
                 logger.warning(f"Pipeline tamamlandı - {len(failed_steps)} adım başarısız")
             else:
                 logger.info(f"Pipeline başarıyla tamamlandı ({total_duration:.1f}s)")
             
-            return pipeline_result
+            return {                
+                'success': len(failed_steps) == 0,
+                'total_duration': total_duration,
+                'completed_steps': completed_steps,
+                'failed_steps': failed_steps,
+                'step_results': self.step_results,  # Bu doğru
+                'step_timings': self.step_timings,
+                'pipeline_summary': self._generate_pipeline_summary(),
+                'results': self.step_results  # Eski uyumluluk için eklendi
+            }
             
         except Exception as e:
             logger.error(f"Pipeline kritik hatası: {str(e)}")

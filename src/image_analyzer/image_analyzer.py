@@ -35,17 +35,23 @@ class ImageAnalyzer(BaseImageAnalyzer):
         self.analysis_results = {}
         self.image_features = []
         
-    def analyze_image_properties(self, image_path: str) -> Dict[str, Any]:
+    def analyze_image_properties(self, image_info) -> Dict[str, Any]:
         """
         Tek bir görüntünün tüm özelliklerini analiz et
         
         Args:
-            image_path: Görüntü dosyası yolu
+            image_info: Görüntü bilgi dictionary'si (path içerir) veya dosya yolu string'i
             
         Returns:
             Görüntü özellikleri sözlüğü
         """
         try:
+            # Image path'i dictionary'den veya direkt string'den al
+            if isinstance(image_info, dict):
+                image_path = image_info.get('path', str(image_info))
+            else:
+                image_path = str(image_info)
+            
             # Görüntüyü yükle
             pil_image, cv_image = self.load_image(image_path)
             if pil_image is None or cv_image is None:
@@ -67,37 +73,43 @@ class ImageAnalyzer(BaseImageAnalyzer):
             return properties
             
         except Exception as e:
+            # Path'i güvenli şekilde al
+            if isinstance(image_info, dict):
+                safe_path = str(image_info.get('path', 'unknown_path'))
+            else:
+                safe_path = str(image_info)
+            
             return {
-                'file_path': str(image_path),
+                'file_path': safe_path,
                 'error': str(e),
                 'analysis_failed': True
             }
     
-    def analyze_dataset_images(self, image_paths: List[str], 
+    def analyze_dataset_images(self, image_infos: List[Dict], 
                              progress_callback: Optional[Callable] = None) -> Dict[str, Any]:
         """
         Tüm veri seti görüntülerini analiz et
         
         Args:
-            image_paths: Görüntü dosyası yolları listesi
+            image_infos: Görüntü bilgi dictionary'leri listesi
             progress_callback: İlerleme callback fonksiyonu
             
         Returns:
             Kapsamlı analiz sonuçları sözlüğü
         """
-        print(f"🔍 {len(image_paths)} görüntü analiz ediliyor...")
+        print(f"🔍 {len(image_infos)} görüntü analiz ediliyor...")
         
         all_properties = []
         failed_images = []
         
         # Her görüntüyü analiz et
-        for i, image_path in enumerate(image_paths):
+        for i, image_info in enumerate(image_infos):
             if progress_callback:
-                progress_callback(i + 1, len(image_paths))
+                progress_callback(i + 1, len(image_info))
             else:
-                self.progress_callback(i + 1, len(image_paths), "Görüntüler analiz ediliyor")
+                self.progress_callback(i + 1, len(image_info), "Görüntüler analiz ediliyor")
             
-            properties = self.analyze_image_properties(image_path)
+            properties = self.analyze_image_properties(image_info)
             
             if properties.get('analysis_failed', False):
                 failed_images.append(properties)

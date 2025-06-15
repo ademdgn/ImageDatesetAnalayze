@@ -151,17 +151,32 @@ class BaseQualityAssessor(ABC):
         Returns:
             Tuple[bool, List[str]]: (Gereksinimler karşılandı mı, Eksikler listesi)
         """
-        requirements = self.config['minimum_requirements']
+        # Config'den minimum requirements'i güvenli bir şekilde al
+        requirements = self.config.get('minimum_requirements', {})
+        if not requirements:
+            # Config'in farklı yerlerinde olabilir
+            requirements = self.config.get('analysis', {}).get('minimum_requirements', {})
+        
+        if not requirements:
+            # Varsayılan değerler
+            requirements = {
+                'min_images_per_class': 50,
+                'min_total_images': 500,
+                'min_resolution': 224,
+                'max_class_imbalance': 0.8
+            }
+        
         issues = []
         
         # Minimum görüntü sayısı kontrolü
         total_images = data.get('total_images', 0)
-        if total_images < requirements['min_total_images']:
-            issues.append(f"Toplam görüntü sayısı yetersiz: {total_images} < {requirements['min_total_images']}")
+        min_total = requirements.get('min_total_images', 500)
+        if total_images < min_total:
+            issues.append(f"Toplam görüntü sayısı yetersiz: {total_images} < {min_total}")
         
         # Sınıf başına minimum görüntü kontrolü
         class_counts = data.get('class_counts', {})
-        min_per_class = requirements['min_images_per_class']
+        min_per_class = requirements.get('min_images_per_class', 50)
         
         for class_name, count in class_counts.items():
             if count < min_per_class:
@@ -169,12 +184,13 @@ class BaseQualityAssessor(ABC):
         
         # Minimum çözünürlük kontrolü
         avg_resolution = data.get('average_resolution', 0)
-        if avg_resolution < requirements['min_resolution']:
-            issues.append(f"Ortalama çözünürlük düşük: {avg_resolution} < {requirements['min_resolution']}")
+        min_resolution = requirements.get('min_resolution', 224)
+        if avg_resolution < min_resolution:
+            issues.append(f"Ortalama çözünürlük düşük: {avg_resolution} < {min_resolution}")
         
         # Class imbalance kontrolü
         class_imbalance = data.get('class_imbalance_ratio', 0)
-        max_imbalance = requirements['max_class_imbalance']
+        max_imbalance = requirements.get('max_class_imbalance', 0.8)
         if class_imbalance > max_imbalance:
             issues.append(f"Sınıf dengesizliği yüksek: {class_imbalance:.2f} > {max_imbalance}")
         

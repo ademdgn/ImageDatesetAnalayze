@@ -340,18 +340,35 @@ class YOLODatasetLoader(BaseDatasetLoader):
             return None
     
     def extract_classes_from_annotations(self) -> Dict[int, str]:
-        """Annotation'lardan sınıf bilgilerini çıkar"""
+        """Annotation'lardan sınıf bilgilerini çıkar - İyileştirilmiş versiyon"""
         class_ids = set()
         
+        # Tüm annotation dosyalarından sınıf ID'lerini topla
         for annotation in self.annotations_info:
             if 'class_id' in annotation:
                 class_ids.add(annotation['class_id'])
         
-        # Sınıf ID'lerini sırala ve varsayılan isimler ver
+        # Eğer hiç sınıf yoksa en azından 1 tane varsayılan sınıf oluştur
+        if not class_ids:
+            self.logger.warning("Hiç sınıf ID'si bulunamadı, varsayılan olarak class_0 oluşturuluyor")
+            class_ids.add(0)
+        
+        # Sınıf ID'lerini sırala ve anlamlı isimler ver
         sorted_class_ids = sorted(class_ids)
-        classes = {class_id: f'class_{class_id}' for class_id in sorted_class_ids}
+        classes = {}
+        
+        for class_id in sorted_class_ids:
+            # Daha anlamlı isimler ver
+            if class_id == 0:
+                classes[class_id] = 'object'  # Varsayılan ana sınıf
+            else:
+                classes[class_id] = f'class_{class_id}'
         
         self.logger.info(f"Annotation'lardan {len(classes)} sınıf çıkarıldı: {list(classes.keys())}")
+        
+        # Otomatik classes.txt dosyası oluştur
+        self._create_default_classes_file(classes)
+        
         return classes
     
     def update_annotation_class_ids(self):
@@ -363,3 +380,24 @@ class YOLODatasetLoader(BaseDatasetLoader):
                     annotation['class_name'] = self.classes_info[class_id]
         
         self.logger.info(f"Annotation sınıf adları güncellendi")
+    
+    def _create_default_classes_file(self, classes: Dict[int, str]):
+        """Eksik classes.txt dosyasını oluştur"""
+        if not classes:
+            return
+        
+        classes_file = self.dataset_path / 'classes.txt'
+        
+        # Eğer zaten varsa oluşturma
+        if classes_file.exists():
+            return
+        
+        try:
+            with open(classes_file, 'w', encoding='utf-8') as f:
+                for class_id in sorted(classes.keys()):
+                    f.write(f"{classes[class_id]}\n")
+            
+            self.logger.info(f"Classes.txt dosyası oluşturuldu: {classes_file}")
+            self.logger.info(f"Oluşturulan sınıflar: {list(classes.values())}")
+        except Exception as e:
+            self.logger.warning(f"Classes.txt oluşturulamadı: {e}")

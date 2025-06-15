@@ -240,3 +240,15 @@ class RecommendationEngine:
                 roadmap['long_term_planning'].append(rec.suggestion)
         
         return roadmap
+    
+    def export_recommendations(self) -> Dict[str, Any]:
+        """Önerileri export formatında döndür"""
+        return {
+            'structured_recommendations': [rec.__dict__ for rec in self.recommendations],
+            'formatted_recommendations': self._sort_and_format_recommendations(),
+            'improvement_roadmap': self.generate_improvement_roadmap(),
+            'total_recommendations': len(self.recommendations),
+            'high_priority_count': len([r for r in self.recommendations if r.priority == 'High']),
+            'medium_priority_count': len([r for r in self.recommendations if r.priority == 'Medium']),
+            'low_priority_count': len([r for r in self.recommendations if r.priority == 'Low'])
+        }

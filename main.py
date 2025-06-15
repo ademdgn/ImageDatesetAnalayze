@@ -15,9 +15,9 @@ import yaml
 from src.data_loader import DatasetLoader
 from src.image_analyzer import ImageAnalyzer
 from src.quality_assessor import DatasetQualityAssessor
-# from src.annotation_analyzer import AnnotationAnalyzer
-# from src.visualizer import Visualizer
-# from src.report_generator import ReportGenerator
+from src.annotation_analyzer import AnnotationAnalyzer
+#from src.visualizer import Visualizer
+#from src.report_generator import ReportGenerator
 
 
 def setup_logging(config):
@@ -58,10 +58,10 @@ class DatasetQualityAnalyzer:
         
         self.data_loader = DatasetLoader(dataset_path, annotation_format, config)
         self.image_analyzer = ImageAnalyzer(config)
-        # self.annotation_analyzer = AnnotationAnalyzer(config)
-        # self.quality_assessor = QualityAssessor(config)
-        # self.visualizer = Visualizer(config)
-        # self.report_generator = ReportGenerator(config)
+        self.annotation_analyzer = AnnotationAnalyzer(config)
+        self.quality_assessor = DatasetQualityAssessor(dataset_path, config)
+        # self.visualizer = Visualizer(config)  # Henüz aktif değil
+        # self.report_generator = ReportGenerator(config)  # Henüz aktif değil
         
         self.logger = logging.getLogger(self.__class__.__name__)
         

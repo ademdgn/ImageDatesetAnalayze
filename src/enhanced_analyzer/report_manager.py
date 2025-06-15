@@ -103,10 +103,23 @@ class ReportManager:
         try:
             if hasattr(quality_assessor, 'recommendation_engine'):
                 report_path = self.reports_dir / f'recommendations_{self.timestamp}.json'
-                success = quality_assessor.recommendation_engine.export_recommendations(
-                    str(report_path), 'json'
-                )
-                return report_path if success else None
+                
+                # export_recommendations() metodunu parametresiz çağır - Hata düzeltmesi
+                try:
+                    # Önce parametresiz çağırmayı dene
+                    recommendations_data = quality_assessor.recommendation_engine.export_recommendations()
+                except TypeError:
+                    # Eğer parametre istiyorsa, output_path parametresi ile çağır
+                    recommendations_data = quality_assessor.recommendation_engine.export_recommendations(str(report_path))
+                    if recommendations_data:  # Eğer dosya yolu döndüyse
+                        return report_path
+                
+                # Eğer veri döndürüldüyse JSON olarak kaydet
+                if recommendations_data:
+                    with open(report_path, 'w', encoding='utf-8') as f:
+                        json.dump(recommendations_data, f, indent=2, ensure_ascii=False, default=str)
+                    return report_path
+                
         except Exception as e:
             logger.error(f"Öneriler raporu oluşturma hatası: {str(e)}")
             return None

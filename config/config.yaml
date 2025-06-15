@@ -26,6 +26,50 @@ analysis:
   
   # Maximum parlaklık değeri
   max_brightness: 225
+  
+  # Enhanced system için ek parametreler
+  image_extensions: ['.jpg', '.jpeg', '.png', '.bmp', '.tiff']
+  annotation_extensions: ['.txt', '.json', '.xml']
+  
+  # Minimum gereksinimler
+  minimum_requirements:
+    min_total_images: 100
+    min_total_annotations: 100
+    min_classes: 2
+    min_samples_per_class: 10
+  
+  # Kalite eşikleri
+  thresholds:
+    image_quality:
+      excellent: 0.9
+      good: 0.75
+      fair: 0.6
+      poor: 0.0
+    annotation_quality:
+      excellent: 0.9
+      good: 0.75
+      fair: 0.6
+      poor: 0.0
+    class_balance:
+      excellent: 0.9
+      good: 0.75
+      fair: 0.6
+      poor: 0.0
+  
+  # Ceza puanları
+  penalties:
+    missing_images: 0.1
+    missing_annotations: 0.1
+    corrupt_files: 0.05
+    class_imbalance: 0.1
+    low_quality_images: 0.05
+  
+  # Öncelik eşikleri
+  priority_thresholds:
+    critical: 0.3
+    high: 0.6
+    medium: 0.8
+    low: 1.0
 
 visualization:
   # Grafik boyutu [genişlik, yükseklik]
