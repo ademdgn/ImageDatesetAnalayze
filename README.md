@@ -185,6 +185,5 @@ Sorularınız için:
 
 ### v1.0.0
 - İlk sürüm
-- Temel analiz fonksiyonları
 - HTML rapor desteği
 - Çoklu format desteği
